@@ -12,3 +12,5 @@ Primero creamos dentro de la función unas variables que nos ayudaran a lo largo
 Lista de nodos (Lista enlazada) y valor a remover
 ### Implementacion:
 Primero creamos una variable la cual llamaremos indirect que va hacer un apuntador al first node de la lista luego hacemos un while hasta que encontremos que el elemento deseado con ello vamos avanzando con el puntero hasta encontrarlo pero queremos estar uno antes del elemento que queremos borrar y eso los asignamos a indirect, ya una vez finalizado el ciclo con ellos hacemos que *indirect se vuelva a conectar a la lista pero uno mas alla del elemento que habiamos encontrado y con ello se eliminaria un elemento de una lista de forma elegante y/o con punteros
+
+##Video de explicación del codigo remove_list: https://youtu.be/2x0EVWj3DpY
