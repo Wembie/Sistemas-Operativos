@@ -8,6 +8,7 @@
 
 void ejecutarPipe( char ** argsTemp, int pipe, int * run ){
     if( pipe == 0 ){ //No tiene Pipe
+        argsTemp[ 1 ][ strlen( argsTemp[ 1 ] ) - 1 ] = '\0';
         argsTemp[ 2 ] = NULL;
         int pid = fork();
         if( pid < 0 ){
@@ -48,7 +49,6 @@ int main( void ){
     char args[ MAX_LINE ]; /* command line arguments */
     char historia[  ] = "No commands in history.";
     int run = 1; /* flag to determine when to exit program */
-
     while( run ){
         int pid, tienePipe;
         char * argsTemp[ MAX_LINE ];
