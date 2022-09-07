@@ -55,7 +55,7 @@ void execEntradaPipe( char ** entrada, char ** entradaPipe ){ //|
                     }
                     else{
                         wait( NULL );
-                        wait( NULL );
+                        return;
                     }
                 }
             }
@@ -74,7 +74,7 @@ void execIn( char ** entrada, char ** nombre ){ //>
             if( pipefd == -1 ){
                 fprintf( stderr, "Error al abrir archivo\n" );
             } 
-            dup2( pipefd, STDIN_FILENO ); //Para escribir por predeterminado en el file (STDOUT), este escribiendo en el extremo de escritura del pipe
+            dup2( pipefd, STDIN_FILENO ); //Para leer por predeterminado en el file (STDIN)
             execvp( entrada[ 0 ], entrada );
             exit( 0 );
         }
