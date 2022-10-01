@@ -32,6 +32,7 @@ int main(int argc, char *argv[]) {
 	{
 		printf( "Menu:\n\n 1.Crear Contenedor\n2.Listar Contenedores\n3. Detener Contenedores\n4. Borrar Contenedor\n--> " );
 		fgets(message, 1000, stdin);
+		message[strcspn(message, "\n")] = 0;
 		printf("mensaje a enviar: %s\n", message);
 		
 		//Send some data
@@ -53,6 +54,32 @@ int main(int argc, char *argv[]) {
 		
 		puts("Server reply :");
 		puts(server_reply);
+		fgets(message, 1000, stdin);
+		message[strcspn(message, "\n")] = 0;
+		if (send(sock, message, strlen(message)+1, 0) < 0) {
+			puts("Send failed");
+			return 1;
+		} else {
+			puts("send ok");
+		}
+		/*switch( message ){	
+			case "1":
+				//Crear
+				break;
+			case "2":
+				//Listar
+				break;
+			case "3":
+				//Detener
+				break;
+			case "4":
+				//Borrar
+				break;
+			default:
+				break;
+		}*/		
+
+		printf("mensaje a enviar: %s\n", message);
 		
 	}
 	close(sock);
