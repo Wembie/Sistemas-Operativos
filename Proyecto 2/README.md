@@ -2,7 +2,7 @@
 ## Juan Esteban Acosta López y Maria Del Mar Villaquiran Dávila
 ## Proyecto 2:
 ### Implementación
-Se nos pide realizar un servidor que reciba peticiones por un puerto y el servidor ebe ejecutarlas, los tipos de peticiones son:
+Se nos pide realizar un servidor que reciba peticiones por un puerto y el servidor debe ejecutarlas, los tipos de peticiones son:
 1. Crear contenedores.
 2. Listar contenedores.
 3. Detener contenedor.
