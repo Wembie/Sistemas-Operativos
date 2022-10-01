@@ -30,7 +30,7 @@ int main(int argc, char *argv[]) {
 
 	while(1)
 	{
-		printf( "Menu:\n\n 1.Crear Contenedor\n2.Listar Contenedores\n3. Detener Contenedores\n4. Borrar Contenedor\n--> " );
+		printf( "Menu:\n\n1.Crear Contenedor\n2.Listar Contenedores\n3. Detener Contenedores\n4. Borrar Contenedor\n--> " );
 		fgets(message, 1000, stdin);
 		message[strcspn(message, "\n")] = 0;
 		printf("mensaje a enviar: %s\n", message);
