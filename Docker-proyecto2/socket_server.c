@@ -1,65 +1,182 @@
-#include<stdio.h>
-#include<string.h>	//strlen
-#include<sys/socket.h>
-#include<arpa/inet.h>	//inet_addr
-#include<unistd.h>	//write
+#include <stdio.h>
+#include <string.h>	//strlen
+#include <sys/socket.h>
+#include <arpa/inet.h>	//inet_addr
+#include <unistd.h>	//write
 #include <pthread.h> 
 #include <stdlib.h>
+#include <sys/wait.h>
 
 typedef struct __myarg_t {
-	char * name;
+	char name[100];
 	char petition;
 } myarg_t;
 
+int buscarNombre(char name[100]){
+	FILE * datos = fopen( "nombresContenedores.txt", "r" );
+	if(datos == NULL){
+        perror("ERROR EN ABRIR EL ARCHIVO");
+		exit(1);
+    }
+	char *linea;
+	int ans = 0;
+	while(fgets(linea, 100, datos) && ans == 0){
+    	linea = strtok(linea, " ");
+		if(strcmp(name, linea) == 0){
+			ans = 1;
+		}
+	}
+	fclose(datos);
+	return ans;
+}
+
+char *obtenerEstado(char name[100]){
+	FILE * datos = fopen( "nombresContenedores.txt", "r" );
+	if(datos == NULL){
+        perror("ERROR EN ABRIR EL ARCHIVO");
+		exit(1);
+    }
+	char *linea;
+	int ans = 0;
+	while(fgets(linea, 100, datos) && ans == 0){
+    	linea = strtok(linea, " ");
+		if(strcmp(name, linea) == 0){
+			ans = 1;
+			linea = strtok(NULL, "\n");
+		}
+	}
+	fclose(datos);
+	if(ans == 0)
+	{
+		return NULL;
+	}
+	return linea;
+}
+
+void modificarEstado(char name[100]){
+	FILE * datos = fopen("nombresContenedores.txt", "r");
+	FILE * nuevo = fopen("temp.txt", "w");
+	if(datos == NULL){
+        perror("ERROR EN ABRIR EL ARCHIVO");
+		exit(1);
+    }
+	char *linea, *nombreTemp;
+	while(fgets(linea, 100, datos)){
+    	nombreTemp = strtok(linea, " ");
+		if(strcmp(name, nombreTemp) == 0){
+			fputs(nombreTemp, nuevo);
+			fputs(" detenido\n", nuevo);
+		}
+		else{
+			fputs(linea, nuevo);
+		}
+	}
+	fclose(datos);
+	fclose(nuevo);
+	datos = fopen("nombresContenedores.txt", "w");
+	nuevo = fopen("temp.txt", "r");
+	while(fgets(linea, 100, nuevo)){
+		fputs(linea, datos);
+	}
+	fclose(datos);
+	fclose(nuevo);
+}
+
+void borrarContenedor(char name[100]){
+	FILE * datos = fopen("nombresContenedores.txt", "r");
+	FILE * nuevo = fopen("temp.txt", "w");
+	if(datos == NULL){
+        perror("ERROR EN ABRIR EL ARCHIVO");
+		exit(1);
+    }
+	char *linea, *nombreTemp;
+	while(fgets(linea, 100, datos)){
+    	nombreTemp = strtok(linea, " ");
+		if(strcmp(name, nombreTemp) != 0){
+			fputs(linea, nuevo);
+		}
+	}
+	fclose(datos);
+	fclose(nuevo);
+	datos = fopen("nombresContenedores.txt", "w");
+	nuevo = fopen("temp.txt", "r");
+	while(fgets(linea, 100, nuevo)){
+		fputs(linea, datos);
+	}
+	fclose(datos);
+	fclose(nuevo);
+}
+
+void escribirEnArchivo(char name[100]){
+	FILE * datos = fopen( "nombresContenedores.txt", "at" );
+	fputs(name, datos);
+	fputs(" activo\n", datos);
+	fclose(datos);
+}
+
+void mostrarContenedores(){
+	FILE * datos = fopen("nombresContenedores.txt", "r");
+	if(datos == NULL){
+        perror("ERROR EN ABRIR EL ARCHIVO");
+		exit(1);
+    }
+	char *linea;
+	while(fgets(linea, 100, datos)){
+    	printf("%s", linea);
+	}
+	fclose(datos);
+}
+
 void *worker(void *arg){
 	myarg_t *m = (myarg_t *) arg;
-    char Lista[1000];
-
-	pid_t pid = fork();
     pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
-    pthread_mutex_lock(&mutex);
     char *line = NULL;
     size_t  len = 0;
     ssize_t read;
-    FILE * datos = fopen( "nombresContenedores.txt", "at" );
-    
-    if(datos == NULL){
-        perror("ERROR EN ABRIR EL ARCHIVO");
-    }
-    while ((read = getline(&line, &len, datos)) != -1) {
-        line[strcspn(line, "\n")] = 0;
-        if (!strcmp(line, m->name)) {
-            printf("SI");
-            break;
-        }
-    }
-    printf("Holita");
-
-    //fputs(&m->name, datos);
+	pid_t pid = fork();
 	if(pid == 0){
-		if(strcmp(&m->petition, "1") == 0){
-			execlp("docker", "docker", "run", "-di", "--name", m->name, "ubuntu:latest", "/bin/bash", NULL);
-		} else if(strcmp(&m->petition, "3") == 0){
-			execlp("docker", "docker", "stop", &m->name, NULL);
-		} else if(strcmp(&m->petition, "4") == 0){
-			execlp("docker", "docker", "rm", &m->name, NULL);
-		} else if(strcmp(&m->petition, "2") == 0){
-			execlp("docker", "docker", "ps", NULL);
+		if(m->petition == '1'){
+			if(buscarNombre(m->name) == 0){
+				pthread_mutex_lock(&mutex);
+				escribirEnArchivo(m->name);
+				execlp("docker", "docker", "run", "-di", "--name", &m->name, "ubuntu:latest", NULL, NULL);
+				pthread_mutex_unlock( &mutex );
+			}
+		} else if(m->petition == '3'){
+			pthread_mutex_lock(&mutex);
+			if(!strcmp(obtenerEstado(m->name), "activo")){ 
+				modificarEstado(m->name);
+				execlp("docker", "docker", "stop", &m->name, NULL); 
+				pthread_mutex_unlock( &mutex );
+			}
+		} else if(m->petition == '4'){
+			pthread_mutex_lock(&mutex);
+			if(!strcmp(obtenerEstado(m->name), "detenido")){
+				borrarContenedor(m->name);
+				execlp("docker", "docker", "rm", &m->name, NULL);
+				pthread_mutex_unlock( &mutex );
+			}
+		} else if(m->petition == '2'){
+			pthread_mutex_lock(&mutex);
+			mostrarContenedores();
+			pthread_mutex_unlock( &mutex );
+		} else if(m->petition == '5'){
+			printf("UwU\n");
 		}
+		
 	} 
 	else{
-		if(strcmp(&m->petition, "1") == 0){
-			printf("Container creado: ");
-		} else if(strcmp(&m->petition, "3") == 0){
-			printf("Container parado: ");
-		} else if(strcmp(&m->petition, "4") == 0){
-			printf("Container borrado: ");
-		} else if(strcmp(&m->petition, "2") == 0){
+		wait(NULL);
+		if(m->petition == '1'){
+			printf("Container created: ");
+		} else if(m->petition == '3'){
+			printf("Container stopped: ");
+		} else if(m->petition == '4'){
+			printf("Container deleted: ");
+		} else if(m->petition == '2'){
 			printf("Listed");
 		}
-
 	}
-    pthread_mutex_unlock( &mutex );
 }
 
 int main(int argc , char *argv[]) {
@@ -116,8 +233,6 @@ int main(int argc , char *argv[]) {
 
 	while(1) {
 		//accept connection from an incoming client
-
-
 		client_sock = accept(socket_desc, (struct sockaddr *)&client, (socklen_t*)&c);
 		if(client_sock < 0) {
 			perror("accept failed");
@@ -134,31 +249,24 @@ int main(int argc , char *argv[]) {
 				//Send the message back to client
                 char server_message[] = " ";
 				if( strcmp( client_message, "1" ) == 0 ){
-					
-					
 					char server_message[] = "Por favor digita el nombre de la imagen a crear: ";
 					memset(client_message, 0, 2000);
 					send(client_sock, server_message, strlen(server_message), 0);
 					if(recv(client_sock, client_message, 2000, 0) > 0) {
 						printf("received message: %s\n", client_message);
-						//targ[cantidadHilos].name = *client_message;
-                        strcpy( targ[cantidadHilos].name, client_message);
+						strcpy(targ[cantidadHilos].name, client_message);
 						targ[cantidadHilos].petition = '1';
 						pthread_create(&tid[cantidadHilos], &attr, worker, &targ[cantidadHilos]); 	
 					}	
-                    printf("NOMBRE: %s \n", targ[cantidadHilos].name);
-                    
-                    
 				}
 				else if( strcmp( client_message, "2" ) == 0 ){
 					//Listar
-					char server_message[] = "Listando... (Dar Enter)";
+					char server_message[] = "Listando... ";
 					memset(client_message, 0, 2000);
 					send(client_sock, server_message, strlen(server_message), 0);
 					if(recv(client_sock, client_message, 2000, 0) > 0) {
 						printf("received message: %s\n", client_message);
-						//targ[cantidadHilos].name = *client_message;
-                        strcpy( targ[cantidadHilos].name, client_message);
+						strcpy(targ[cantidadHilos].name, client_message);
 						targ[cantidadHilos].petition = '2';
 						pthread_create(&tid[cantidadHilos], &attr, worker, &targ[cantidadHilos]); 
 					}
@@ -171,8 +279,7 @@ int main(int argc , char *argv[]) {
 					send(client_sock, server_message, strlen(server_message), 0);
 					if(recv(client_sock, client_message, 2000, 0) > 0) {
 						printf("received message: %s\n", client_message);
-						//targ[cantidadHilos].name = *client_message;
-                        strcpy( targ[cantidadHilos].name, client_message);
+						strcpy(targ[cantidadHilos].name, client_message);
 						targ[cantidadHilos].petition = '3';
 						pthread_create(&tid[cantidadHilos], &attr, worker, &targ[cantidadHilos]); 	
 					}
@@ -183,8 +290,7 @@ int main(int argc , char *argv[]) {
 					send(client_sock, server_message, strlen(server_message), 0);
 					if(recv(client_sock, client_message, 2000, 0) > 0) {
 						printf("received message: %s\n", client_message);
-						//targ[cantidadHilos].name = *client_message;
-                        strcpy( targ[cantidadHilos].name, client_message);
+						strcpy(targ[cantidadHilos].name, client_message);
 						targ[cantidadHilos].petition = '4';
 						pthread_create(&tid[cantidadHilos], &attr, worker, &targ[cantidadHilos]); 
 					}
