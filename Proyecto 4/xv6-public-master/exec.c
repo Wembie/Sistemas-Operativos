@@ -102,6 +102,8 @@ exec(char *path, char **argv)
   switchuvm(curproc);
   freevm(oldpgdir);
   return 0;
+  
+curproc->priority = 2; //Giving child process default priority of 2
 
  bad:
   if(pgdir)
