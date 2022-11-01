@@ -17,3 +17,5 @@
 11. Ahora, hacemos los cambios apropiados en el Makefile . En Makefile, en 'UPROGS' y También en la sección EXTRAS del Makefile, agregue nice.c , dpro.c y ps.c
 12. El algoritmo de programación de CPU por turnos basado en prioridades se basa en la integración del algoritmo de programación por turnos y de prioridad. Conserva la ventaja del turno rotatorio para reducir el hambre y también integra la ventaja de la programación prioritaria. El algoritmo de programación de CPU por turnos existente no se puede implementar en el sistema operativo en tiempo real debido a sus altas tasas de cambio de contexto, gran tiempo de espera, gran tiempo de respuesta, gran tiempo de respuesta y menor rendimiento. El algoritmo propuesto mejora todos los inconvenientes del algoritmo de programación por turnos.
 Para implementar esto, hacemos los cambios requeridos en la función del planificador en el archivo proc.c.
+
+Link Video: 
