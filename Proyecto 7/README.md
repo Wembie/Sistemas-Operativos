@@ -36,3 +36,13 @@ Limitaciones de tamaño de bloque : el estándar de protocolo NFS actual permite
 Hay otros problemas con NFS, pero estos son nuestros cinco principales. Sí, las restricciones de tamaño de bloque podrían hacerse más grandes fácilmente, pero luego los tiempos de espera deberían ajustarse y tal vez repensarse. Y sí, se acerca el acceso a archivos en paralelo, pero los problemas de protocolo de conversación y uso compartido de archivos (bloqueo y almacenamiento en caché) enumerados anteriormente son mucho más difíciles de resolver.
 
 NFS ha funcionado bien durante más de 35 años. No está claro si NFS se puede rescatar en el mundo de archivos pequeños de hoy. Se podría impulsar otra versión de NFS a través del comité del estándar, pero nuestra opinión es que el problema de la charlatanería es demasiado endémico en la definición del protocolo para eliminarlo por completo, Y NFS necesita admitir archivos compartidos por completo o no, hacer ambas cosas es una receta por fracaso
+
+### 2. COMANDOS
+
+docker pull erichough/nfs-server
+
+docker run -v /host/path/to/shared/files:/some/container/path -v /host/path/to/exports.txt:/etc/exports:ro --cap-add SYS_ADMIN -p 2049:2049 erichough/nfs-server
+
+ERROR:
+
+![image](https://user-images.githubusercontent.com/73087520/204031950-ced8e835-02b0-492f-a584-bde0c08c609d.png)
