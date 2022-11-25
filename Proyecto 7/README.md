@@ -43,6 +43,7 @@ Comando de extracción de ventana acoplable:
 - mkdir nfs
 - nano docker-compose.yml
 Ahora colocamos en el .yml
+````
 version: "2.1"
 services:
   # https://hub.docker.com/r/itsthenetwor...
@@ -57,6 +58,7 @@ services:
       - /data/docker-volumes:/data
     ports:
       - 2049:2049
+````
 En esta parte estamos creando el sevidor.
 - sudo apt install docker-compose
 - docker-compose up
