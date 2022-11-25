@@ -1,7 +1,7 @@
 # Sistemas Operativos
 ## Juan Esteban Acosta López y Maria Del Mar Villaquiran Dávila
 ## Proyecto 7:
-##1.
+## 1.
 ### ¿Qué es el sistema de archivos de red (NFS)?
 < Volver Al Centro De Aprendizaje
 ¿Qué es el sistema de archivos de red (NFS)?
