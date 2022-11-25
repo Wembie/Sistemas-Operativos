@@ -39,10 +39,17 @@ NFS ha funcionado bien durante más de 35 años. No está claro si NFS se puede 
 
 ### 2. COMANDOS
 
+Comando de extracción de ventana acoplable:
 docker pull erichough/nfs-server
 
+Iniciando el servidor:
 docker run -v /host/path/to/shared/files:/some/container/path -v /host/path/to/exports.txt:/etc/exports:ro --cap-add SYS_ADMIN -p 2049:2049 erichough/nfs-server
 
 ERROR:
 
 ![image](https://user-images.githubusercontent.com/73087520/204031950-ced8e835-02b0-492f-a584-bde0c08c609d.png)
+
+Se intento de todas las formas posibles pero al parecer era un problema de ubuntu y ya no nos dio el tiempo para seguir, Ya luego una vez se creearia el servidor:
+
+Montaje de sistemas de archivos desde un cliente:
+mount <container-IP>:/some/export /some/local/path
