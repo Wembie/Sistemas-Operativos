@@ -65,16 +65,16 @@ En esta parte estamos creando el sevidor.
 - Y ya con eso ponemos a correr el sevidor NFS
 ## 3. USAR SERVIDOR NFS
 sudo apt install nfs-common -y
-Ahora creamos los clientes con el comando
+-Ahora creamos los clientes con el comando
 - docker run -itd --privileged=true --net=host d3fk/nfs-client
 - docker exec -it {practical_joliot} sh (sudo docker ps -a)
-Y luego para acceder al carpeta compartida del servidor accedemos a la carpeta mnt y colocamos:
-Pero para esto hay que saber a que ip debemos acceder a la nfs y colocamos
+- Y luego para acceder al carpeta compartida del servidor accedemos a la carpeta mnt y colocamos:
+- Pero para esto hay que saber a que ip debemos acceder a la nfs y colocamos
 - docker inspect continer nfs
 - sudo mount -v -o vers=4,loud 172.0.18.2:/ /mnt/nfs-1
-Creamos un directorio para probar 
+- Creamos un directorio para probar 
 - mkdir prueba1
-Y luego para comprobar eso
+- Y luego para comprobar eso
 - sudo docker exec -it nfs /bin/bash
-Y accedemos a la carpeta compartida del servidor
-Y ahí estara el directorio
+- Y accedemos a la carpeta compartida del servidor
+- Y ahí estara el directorio
