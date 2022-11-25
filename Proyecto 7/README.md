@@ -40,16 +40,39 @@ NFS ha funcionado bien durante más de 35 años. No está claro si NFS se puede 
 ### 2. COMANDOS
 
 Comando de extracción de ventana acoplable:
-docker pull erichough/nfs-server
-
-Iniciando el servidor:
-docker run -v /host/path/to/shared/files:/some/container/path -v /host/path/to/exports.txt:/etc/exports:ro --cap-add SYS_ADMIN -p 2049:2049 erichough/nfs-server
-
-ERROR:
-
-![image](https://user-images.githubusercontent.com/73087520/204031950-ced8e835-02b0-492f-a584-bde0c08c609d.png)
-
-Se intento de todas las formas posibles pero al parecer era un problema de ubuntu y ya no nos dio el tiempo para seguir, Ya luego una vez se creearia el servidor:
-
-Montaje de sistemas de archivos desde un cliente:
-mount <container-IP>:/some/export /some/local/path
+- mkdir nfs
+- nano docker-compose.yml
+Ahora colocamos en el .yml
+version: "2.1"
+services:
+  # https://hub.docker.com/r/itsthenetwor...
+  nfs:
+    image: itsthenetwork/nfs-server-alpine:12
+    container_name: nfs
+    restart: always
+    privileged: true
+    environment:
+      - SHARED_DIRECTORY=/data
+    volumes:
+      - /data/docker-volumes:/data
+    ports:
+      - 2049:2049
+En esta parte estamos creando el sevidor.
+- sudo apt install docker-compose
+- docker-compose up
+- Y ya con eso ponemos a correr el sevidor NFS
+## 3. USAR SERVIDOR NFS
+sudo apt install nfs-common -y
+Ahora creamos los clientes con el comando
+- docker run -itd --privileged=true --net=host d3fk/nfs-client
+- docker exec -it {practical_joliot} sh (sudo docker ps -a)
+Y luego para acceder al carpeta compartida del servidor accedemos a la carpeta mnt y colocamos:
+Pero para esto hay que saber a que ip debemos acceder a la nfs y colocamos
+- docker inspect continer nfs
+- sudo mount -v -o vers=4,loud 172.0.18.2:/ /mnt/nfs-1
+Creamos un directorio para probar 
+- mkdir prueba1
+Y luego para comprobar eso
+- sudo docker exec -it nfs /bin/bash
+Y accedemos a la carpeta compartida del servidor
+Y ahí estara el directorio
