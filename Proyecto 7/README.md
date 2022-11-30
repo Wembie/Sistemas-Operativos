@@ -34,44 +34,72 @@ Hay otros problemas con NFS, pero estos son nuestros cinco principales. Sí, las
 
 NFS ha funcionado bien durante más de 35 años. No está claro si NFS se puede rescatar en el mundo de archivos pequeños de hoy. Se podría impulsar otra versión de NFS a través del comité del estándar, pero nuestra opinión es que el problema de la charlatanería es demasiado endémico en la definición del protocolo para eliminarlo por completo, Y NFS necesita admitir archivos compartidos por completo o no, hacer ambas cosas es una receta por fracaso
 
-### 2. COMANDOS
+### COMANDOS
 
-Comando de extracción de ventana acoplable:
-- mkdir nfs
-- nano docker-compose.yml
-Ahora colocamos en el .yml
-````
+$ mkdir -p /data/nfs-storage
+
+$ docker run -itd --privileged \
+  --restart unless-stopped \
+  -e SHARED_DIRECTORY=/data \
+  -v /data/nfs-storage:/data \
+  -p 2049:2049 \
+  itsthenetwork/nfs-server-alpine:12
+  
 version: "2.1"
 services:
-  # https://hub.docker.com/r/itsthenetwor...
+  # https://hub.docker.com/r/itsthenetwork/nfs-server-alpine
   nfs:
     image: itsthenetwork/nfs-server-alpine:12
     container_name: nfs
-    restart: always
+    restart: unless-stopped
     privileged: true
     environment:
       - SHARED_DIRECTORY=/data
     volumes:
-      - /data/docker-volumes:/data
+      - /data/nfs-storage:/data
     ports:
       - 2049:2049
-````
-En esta parte estamos creando el sevidor.
-- sudo apt install docker-compose
-- docker-compose up
-- Y ya con eso ponemos a correr el sevidor NFS
-## 3. USAR SERVIDOR NFS
-sudo apt install nfs-common -y
--Ahora creamos los clientes con el comando
-- docker run -itd --privileged=true --net=host d3fk/nfs-client
-- docker exec -it {practical_joliot} sh (sudo docker ps -a)
-- Y luego para acceder al carpeta compartida del servidor accedemos a la carpeta mnt y colocamos:
-- Pero para esto hay que saber a que ip debemos acceder a la nfs y colocamos
-- docker inspect continer nfs
-- sudo mount -v -o vers=4,loud 172.0.18.2:/ /mnt/nfs-1
-- Creamos un directorio para probar 
-- mkdir prueba1
-- Y luego para comprobar eso
-- sudo docker exec -it nfs /bin/bash
-- Y accedemos a la carpeta compartida del servidor
-- Y ahí estara el directorio
+      
+$ docker-compose up -d
+
+
+$ sudo apt install nfs-client -y
+$ sudo mount -v -o vers=4,loud 192.168.0.4:/ /mnt
+
+$ df -h
+Filesystem      Size  Used Avail Use% Mounted on
+/dev/sda2       109G   53G   51G  52% /
+192.168.0.4:/   4.5T  2.2T  2.1T  51% /mnt
+
+$ touch /mnt/file.txt
+
+$ ls /data/nfs-storage/
+file.txt
+
+
+192.168.0.4:/   /mnt   nfs4    _netdev,auto  0  0
+
+$ wget https://github.com/ContainX/docker-volume-netshare/releases/download/v0.36/docker-volume-netshare_0.36_amd64.deb
+$ dpkg -i docker-volume-netshare_0.36_amd64.deb
+$ service docker-volume-netshare start
+
+version: '3.7'
+
+services:
+  mysql:
+    image: mariadb:10.1
+    networks:
+      - private
+    environment:
+      - MYSQL_ROOT_PASSWORD=${DATABASE_PASSWORD:-admin}
+      - MYSQL_DATABASE=testdb
+      - MYSQL_USER=${DATABASE_USER:-admin}
+      - MYSQL_PASSWORD=${DATABASE_PASSWORD:-admin}
+    volumes:
+      - mysql_data.vol:/var/lib/mysql
+
+volumes:
+  mysql_data.vol:
+    driver: nfs
+    driver_opts:
+      share: 192.168.69.1:/mysql_data_vol
